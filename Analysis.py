@@ -55,11 +55,11 @@ def nday_price(n_days):
     volume.index = pd.to_datetime(volume.index)
 
     tsmc = {
-        'close': close['2330']['2017'].dropna().astype(float),
-        'open': open['2330']['2017'].dropna().astype(float),
-        'high': high['2330']['2017'].dropna().astype(float),
-        'low': low['2330']['2017'].dropna().astype(float),
-        'volume': volume['2330']['2017'].dropna().astype(float),
+        'close': close['2330']['2018'].dropna().astype(float),
+        'open': open['2330']['2018'].dropna().astype(float),
+        'high': high['2330']['2018'].dropna().astype(float),
+        'low': low['2330']['2018'].dropna().astype(float),
+        'volume': volume['2330']['2018'].dropna().astype(float),
     }
 
     return tsmc
@@ -69,5 +69,6 @@ if __name__ == "__main__":
     # df = financial_statement(2017, 2, '營益分析彙總表')
     # print(pick_stock(df))
 
-    out = nday_price(9)
+    out = nday_price(5)
     out['close'].plot()
+
