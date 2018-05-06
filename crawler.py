@@ -292,6 +292,8 @@ if __name__ == "__main__":
     cond2 = df['營業利益率(%)(營業利益)/(營業收入)'].astype(float) > 5
     print(df[cond1 & cond2])
 
+    main()
+
 
 
 
