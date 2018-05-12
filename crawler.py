@@ -3,6 +3,7 @@ from io import StringIO
 import pandas as pd
 import numpy as np
 import csv
+import sqlite3
 
 import time
 import os, re, time, string, logging, requests, argparse
@@ -24,7 +25,7 @@ class Crawler():
             mkdir(prefix)
         self.prefix = prefix
 
-    def clear_row(self, row):
+    def _clean_row(self, row):
         ''' Clean comma and spaces '''
         for index, content in enumerate(row):
             row[index] = re.sub(",", "", content.strip())
@@ -34,7 +35,10 @@ class Crawler():
         ''' Save row to csv file '''
         f = open('{}/{}.csv'.format(self.prefix, stock_id), 'a')
         cw = csv.writer(f, lineterminator='\n')
+        key = ['Date', 'Days_Trade', 'Turnover_Value', 'Open', 'Day_High', 'Day_Low', 'Close', 'Price_Dif', 'Num_Deals']
+        cw.writerow(key)
         cw.writerow(row)
+        print(row)
         f.close()
 
     def _get_tse_data(self, date_tuple):
@@ -259,6 +263,32 @@ def financial_statement(year, season, type='綜合損益彙總表'):
 
 
 if __name__ == "__main__":
+    crawler = Crawler()
+    first_day = datetime(2018, 5, 11)
+    crawler.get_data((first_day.year, first_day.month, first_day.day))
+
+# databas Example
+# current_path = os.path.dirname(os.path.abspath(__file__))
+# db_name = current_path + 'StockDatabase.pb'
+# xlsx_name = current_path + 'test.xlsx'
+#
+# #convert from Excel to sqlite
+# xlsx_file = pd.ExcelFile(xlsx_name)
+# dfs = pd.read_excel(xlsx_file, sheet_name = '0204', header=0, index_col=0)
+#
+# #xlsx_file to SQLite
+# con = sqlite3.connect(db_name)
+# dfs.to_sql(name = "Database", con=con, if_exists='replace')
+# con.close()
+#
+# #Read squlite query results into pandas DataFrame
+# con = sqlite3.connect(db_name)
+# dfs1 = pd.read_sql_query("SELECT * from Database WHERE Zoom='4x' AND lux='100lux", con)
+# print('Total items =' + str(len(dfs1)))
+# for index, row in dfs1.iterrows():
+#     tmp_file = row['Folder Path']
+# con.close()
+
 # select stocks (本益比) Example
     #datestr = '20180131'
     #df = daily_report(datestr)
@@ -270,12 +300,12 @@ if __name__ == "__main__":
     #df = financial_statement(2017,1,'營益分析彙總表')
     #print(df)
 # pick stock Example
-    df = financial_statement(2017, 2, '營益分析彙總表')
+#df = financial_statement(2017, 2, '營益分析彙總表')
     #print(df)
-    df = df.drop(['合計：共 880 家'], axis=1)  #drop unnecessary column
-    df = df.set_index(['公司名稱']) #replace idx with company name
-    print (df)
-    df = df.astype(float) #set data type to float
+# df = df.drop(['合計：共 880 家'], axis=1)  #drop unnecessary column
+# df = df.set_index(['公司名稱']) #replace idx with company name
+# print (df)
+#df = df.astype(float) #set data type to float
     #df = df.drop(['合計：共 880 家'], axis=1).set_index(['公司名稱']).astype(float) #put the above command in one line
     #取得毛利率
     #print(df['毛利率(%)(營業毛利)/(營業收入)'])
@@ -288,14 +318,8 @@ if __name__ == "__main__":
     #df['毛利率(%)(營業毛利)/(營業收入)'].astype(float).hist(bins=range(-100,100))
     #plt.plot((df['毛利率(%)(營業毛利)/(營業收入)'].astype(float).hist(bins=range(-100,100))))
     #plt.show()
-    cond1 = df['毛利率(%)(營業毛利)/(營業收入)'].astype(float) > 20
-    cond2 = df['營業利益率(%)(營業利益)/(營業收入)'].astype(float) > 5
-    print(df[cond1 & cond2])
+# cond1 = df['毛利率(%)(營業毛利)/(營業收入)'].astype(float) > 20
+# cond2 = df['營業利益率(%)(營業利益)/(營業收入)'].astype(float) > 5
+# print(df[cond1 & cond2])
 
-    main()
-
-
-
-
-
-
+#main()
