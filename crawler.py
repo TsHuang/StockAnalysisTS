@@ -35,10 +35,10 @@ class Crawler():
         ''' Save row to csv file '''
         f = open('{}/{}.csv'.format(self.prefix, stock_id), 'a')
         cw = csv.writer(f, lineterminator='\n')
-        key = ['Date', 'Days_Trade', 'Turnover_Value', 'Open', 'Day_High', 'Day_Low', 'Close', 'Price_Dif', 'Num_Deals']
-        cw.writerow(key)
+        # key = ['Date', 'Days_Trade', 'Turnover_Value', 'Open', 'Day_High', 'Day_Low', 'Close', 'Price_Dif', 'Num_Deals']
+        # cw.writerow(key)
         cw.writerow(row)
-        print(row)
+        #print(row)
         f.close()
 
     def _get_tse_data(self, date_tuple):
@@ -118,6 +118,44 @@ class Crawler():
         self._get_tse_data(date_tuple)
         self._get_otc_data(date_tuple)
 
+    def string_to_time(self, string):
+        year, month, day = string.split('/')
+        return datetime(int(year) + 1911, int(month), int(day))
+
+    def is_same(self, row1, row2):
+        if not len(row1) == len(row2):
+            return False
+
+        for index in range(len(row1)):
+            if row1[index] != row2[index]:
+                return False
+        else:
+            return True
+
+    def post_process(self):
+        folder = os.path.dirname(os.path.abspath(__file__)) + '//' + self.prefix
+        print(folder)
+        file_names = os.listdir()
+        for file_name in file_names:
+            if not file_name.endswith('.csv'):
+                continue
+
+            dict_rows = {}
+
+            # Load and remove duplicates (use newer)
+            with open('{}/{}'.format(folder, file_name), 'r') as file:
+                for line in file.readlines():
+                    dict_rows[line.split(',', 1)[0]] = line
+
+            # Sort by date
+            rows = [row for date, row in sorted(
+                dict_rows.items(), key=lambda x: self.string_to_time(x[0]))]
+
+            with open('{}/{}'.format(folder, file_name), 'w') as file:
+                file.writelines(rows)
+
+
+
 def main():
     # Set logging
     if not os.path.isdir('log'):
@@ -172,6 +210,7 @@ def main():
     else:
         crawler.get_data((first_day.year, first_day.month, first_day.day))
 
+    crawler.post_process()
 
 def crawl_price(date):
     r = requests.post(
@@ -263,9 +302,12 @@ def financial_statement(year, season, type='綜合損益彙總表'):
 
 
 if __name__ == "__main__":
-    crawler = Crawler()
-    first_day = datetime(2018, 5, 11)
-    crawler.get_data((first_day.year, first_day.month, first_day.day))
+    main()
+    # crawler = Crawler()
+    # first_day = datetime(2018, 5, 11)
+    # crawler.get_data((first_day.year, first_day.month, first_day.day))
+    # current_path = os.path.dirname(os.path.abspath(__file__))
+    #print(current_path)
 
 # databas Example
 # current_path = os.path.dirname(os.path.abspath(__file__))
