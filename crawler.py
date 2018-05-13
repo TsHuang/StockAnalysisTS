@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import requests
 from io import StringIO
 import pandas as pd
@@ -19,11 +21,15 @@ modify the record function in crawler to save the data to database
 '''
 
 class Crawler():
-    def __init__(self, prefix='data'):
+    def __init__(self, prefix='data', database='database'):
         ''' Make directory if not exist when initialize '''
         if not isdir(prefix):
             mkdir(prefix)
         self.prefix = prefix
+
+        if not isdir("database"):
+            mkdir("database")
+        self.database = database
 
     def _clean_row(self, row):
         ''' Clean comma and spaces '''
@@ -154,6 +160,33 @@ class Crawler():
             with open('{}/{}'.format(folder, file_name), 'w') as file:
                 file.writelines(rows)
 
+    def csv2sql(self):
+        current_path = os.path.dirname(os.path.abspath(__file__)) + '/'
+        data_folder = current_path + self.prefix + "/"
+        db_folder = current_path + self.database + "/"
+        keys = ['Date', 'Days_Trade', 'Turnover_Value', 'Open', 'Day_High', 'Day_Low', 'Close', 'Price_Dif',
+                'Num_Deals']
+        idx_col = ['Date']
+
+        db_file = db_folder + "stockPrice.db"
+        con = sqlite3.connect(db_file)
+        processed_files = 0
+        for filename in os.listdir(os.path.join(data_folder)):
+            if os.path.splitext(filename)[1] != '.csv':
+                print('csv to sql: ignore file:' + filename)
+                continue
+            csv_file = data_folder + filename
+
+            df = pd.read_csv(csv_file, names=keys)
+            df.to_sql(name=filename[:-4], con=con, if_exists='replace')
+            # print(csv_file)
+            # print('csv to sql:' + filename[:-4])
+            processed_files = processed_files + 1;
+            if processed_files % 200 == 0:
+                print('csv to sql:' + processed_files + 'were converted.')
+
+        con.close()
+
 
 
 def main():
@@ -210,7 +243,10 @@ def main():
     else:
         crawler.get_data((first_day.year, first_day.month, first_day.day))
 
+    print('crawler: start post_processing')
     crawler.post_process()
+    print('crawler: start csv2sql')
+    # crawler.csv2sql()
 
 def crawl_price(date):
     r = requests.post(

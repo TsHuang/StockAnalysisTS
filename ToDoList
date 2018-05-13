@@ -1,4 +1,5 @@
 1. Modify the _record function in crawler.py to save in one excel
-1. Crawl prices to SQLite database
-2. Example to query from the database
-3. GUI Interface
+2. plot from csv file
+2. csv file to SQLite database
+3. Example to query from the database
+4. GUI Interface
