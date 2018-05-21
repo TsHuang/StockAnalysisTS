@@ -7,7 +7,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as mticker
-from matplotlib.finance import candlestick_ohlc
+# from matplotlib.finance import candlestick_ohlc #will be deprecated
+from mpl_finance import candlestick_ohlc
 import datetime
 import DateTime
 
@@ -68,7 +69,7 @@ if __name__ == "__main__":
         new_date_format = datetime.datetime.strptime(new_date_format, '%Y/%m/%d').strftime('%Y-%m-%d')
         dfs1['Date'].values[idx] = new_date_format
 
-    print(dfs1)
+    #print(dfs1)
 
     dfs1.Date = pd.to_datetime(dfs1.Date)
     dfs1.Open = dfs1.Open.astype(float)
@@ -78,16 +79,24 @@ if __name__ == "__main__":
     dfs1.Num_Deals = dfs1.Num_Deals.astype(float)
 
     df_candleStickPlot = dfs1[['Date', 'Open', 'Day_High', 'Day_Low', 'Close', 'Num_Deals']]
-    df_candleStickPlot["Date"] = df_candleStickPlot["Date"].apply(mdates.date2num)
+    df_candleStickPlot['Date'] = df_candleStickPlot['Date'].apply(mdates.date2num)
+    df_candleStickPlot['MA50'] = df_candleStickPlot['Day_High'].rolling(10).mean()
+    print(df_candleStickPlot)
+    # df_candleStickPlot.reset_index(inplace=True)
 
+    #f1, ax = plt.subplot2grid((6, 4), (1, 0), rowspan=6, colspan=4, axisbg='#07000d')
     f1 = plt.subplot2grid((6, 4), (1, 0), rowspan=6, colspan=4, axisbg='#07000d')
+    #f1, ax = plt.subplots()
     candlestick_ohlc(f1, df_candleStickPlot.values, width=.6, colorup='#ff1717', colordown='#53c156')
+    f1.plot(df_candleStickPlot['Date'], df_candleStickPlot['MA50'])
+
     f1.xaxis_date()
-    f1.xaxis.set_major_formatter(mdates.DateFormatter('%y-%m-%d %H:%M:%S'))
+    # f1.xaxis.set_major_formatter(mdates.DateFormatter('%y-%m-%d %H:%M:%S'))
+    f1.xaxis.set_major_formatter(mdates.DateFormatter('%y-%m-%d'))
 
     plt.xticks(rotation=45)
     plt.ylabel('Stock Price')
-    plt.xlabel('Date Hours:Minutes')
+    plt.xlabel('Date')
     plt.show()
 
     #candlestick_ohlc(ax1, datas_candleStickPlot)
