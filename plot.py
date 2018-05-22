@@ -17,7 +17,7 @@ def candleStickPlot(dfs1, MAs):
     df_candleStickPlot = dfs1[['Date', 'Open', 'Day_High', 'Day_Low', 'Close', 'Num_Deals']]
     df_candleStickPlot['Date'] = df_candleStickPlot['Date'].apply(mdates.date2num)
 
-    f1 = plt.subplot2grid((6, 4), (1, 0), rowspan=6, colspan=4, axisbg='#07000d')
+    f1 = plt.subplot2grid((6, 4), (0, 0), rowspan=5, colspan=4, axisbg='#07000d')
 
     # plot candlestick
     candlestick_ohlc(f1, df_candleStickPlot.values, width=.6, colorup='#ff1717', colordown='#53c156')
@@ -28,13 +28,22 @@ def candleStickPlot(dfs1, MAs):
         ma_key = 'MA' + str(MA_value)
         f1.plot(dfs1['Date'], dfs1[ma_key])  # plot MA
 
-    f1.xaxis_date()
-    # f1.xaxis.set_major_formatter(mdates.DateFormatter('%y-%m-%d %H:%M:%S'))
-    f1.xaxis.set_major_formatter(mdates.DateFormatter('%y-%m-%d'))
 
+    # f1.xaxis.set_major_formatter(mdates.DateFormatter('%y-%m-%d %H:%M:%S'))
+    # f1.xaxis.set_major_formatter(mdates.DateFormatter('%y-%m-%d'))
+    f1.set_title('2454')
+    f1.axes.get_xaxis().set_visible(False)
+    f1.set_ylabel('Price')
+
+    # plot volumn
+    f2, axes = plt.subplot2grid((6, 4), (5, 0), rowspan=6, colspan=4, axisbg='#07000d')
+    f2.bar(dfs1['Date'], dfs1['Num_Deals'])
+    f2.set_ylabel('Volume')
+    # f2.xaxis_date()
+    # f2.xaxis.set_major_formatter(mdates.DateFormatter('%y-%m-%d'))
     plt.xticks(rotation=45)
-    plt.ylabel('Stock Price')
-    plt.xlabel('Date')
+    #plt.sca(axes[1, 0])
+
     plt.show()
 
 
