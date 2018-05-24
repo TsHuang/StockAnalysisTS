@@ -36,7 +36,7 @@ def candleStickPlot(dfs1, MAs):
     f1.set_ylabel('Price')
 
     # plot volumn
-    f2, axes = plt.subplot2grid((6, 4), (5, 0), rowspan=6, colspan=4, axisbg='#07000d')
+    f2 = plt.subplot2grid((6, 4), (5, 0), rowspan=6, colspan=4, axisbg='#07000d')
     f2.bar(dfs1['Date'], dfs1['Num_Deals'])
     f2.set_ylabel('Volume')
     # f2.xaxis_date()
