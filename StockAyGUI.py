@@ -35,49 +35,62 @@ class App(QMainWindow):
         self.setGeometry(self.left, self.top, self.width, self.height)
 
         # m = PlotCanvas(self, width=5, height=4)
-        m = PlotCandlit(self, width=5, height=4)
+        self.candlelit = PlotCandlit(self, width=5, height=4)
 
-        m.move(0, 0)
+        # m.move(0, 0)
 
-        button = QPushButton('PyQt5 button', self)
-        button.setToolTip('This s an example button')
-        button.move(500, 0)
-        button.resize(140, 100)
+        self.line_hello = QLineEdit(self)
+        self.line_hello.setText("2454")
+        self.button_search = QPushButton('Search', self)
+        self.button_search.setToolTip('Search and show the candlelit plot')
+        # self.button_search.move(500, 0)
+
+        form_layout = QFormLayout()
+        form_layout.addRow(self.button_search, self.line_hello)
+        # form_layout.addRow(self.line_hello)
+        form_layout.addRow(self.candlelit)
+
+        h_layout = QVBoxLayout()
+        h_layout.addLayout(form_layout)
+
+        self.setLayout(h_layout)
+
+        # button.resize(140, 100)
 
         self.show()
 
 
-class PlotCanvas(FigureCanvas):
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
-        fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = fig.add_subplot(111)
-
-        FigureCanvas.__init__(self, fig)
-        self.setParent(parent)
-
-        FigureCanvas.setSizePolicy(self,
-                                   QSizePolicy.Expanding,
-                                   QSizePolicy.Expanding)
-        FigureCanvas.updateGeometry(self)
-        self.plot()
-
-    def plot(self):
-        data = [random.random() for i in range(25)]
-        ax = self.figure.add_subplot(211)
-        ax.plot(data, 'r-')
-        ax.set_title('PyQt Matplotlib Example')
-        ax2 = self.figure.add_subplot(212)
-        ax2.plot(data, 'r-')
-        ax2.set_title('PyQt Matplotlib Example')
-        self.draw()
+# class PlotCanvas(FigureCanvas):
+#     def __init__(self, parent=None, width=5, height=4, dpi=100):
+#         fig = Figure(figsize=(width, height), dpi=dpi)
+#         self.axes = fig.add_subplot(111)
+#
+#         FigureCanvas.__init__(self, fig)
+#         self.setParent(parent)
+#
+#         FigureCanvas.setSizePolicy(self,
+#                                    QSizePolicy.Expanding,
+#                                    QSizePolicy.Expanding)
+#         FigureCanvas.updateGeometry(self)
+#         self.plot()
+#
+#     def plot(self):
+#         data = [random.random() for i in range(25)]
+#         ax = self.figure.add_subplot(211)
+#         ax.plot(data, 'r-')
+#         ax.set_title('PyQt Matplotlib Example')
+#         ax2 = self.figure.add_subplot(212)
+#         ax2.plot(data, 'r-')
+#         ax2.set_title('PyQt Matplotlib Example')
+#         self.draw()
 
 
 class PlotCandlit(FigureCanvas):
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
-        # fig = Figure(figsize=(5, 4), dpi=100)
+    def __init__(self, parent=None, width=7, height=6, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
         # self.axes2 = fig.add_subplot(212)
+
 
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)
@@ -85,27 +98,16 @@ class PlotCandlit(FigureCanvas):
         FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
 
-        # fig = Figure(figsize=(width, height), dpi=dpi)
-        # fig = Figure(figsize=(500, 500), facecolor='black', edgecolor='red')
-        fig = plt.figure(figsize=(10, 60), facecolor='green', edgecolor='red')
 
         self.canvas = FigureCanvas(fig)
-        # self.axes = fig.add_subplot(111)
-        # self.f1 = plt.subplot2grid((6, 4), (0, 0), rowspan=5, colspan=4, axisbg='#07000d')
-        # self.f2 = plt.subplot2grid((6, 4), (5, 0), rowspan=6, colspan=4, axisbg='#07000d')
 
-
+        #fig = plt.figure(figsize=(10, 60), facecolor='green', edgecolor='red')
 
         MAs = [5, 10, 20]  # Moving average of 5, 10, 20 days
         dfs1 = self.getDataByStockIdx(stockIdx=2454, MAs=MAs, days=60)
         self.candleStickPlot(dfs1=dfs1, MAs=MAs)
 
-    # def plot(self):
-    #     data = [random.random() for i in range(25)]
-    #     ax = self.figure.add_subplot(111)
-    #     ax.plot(data, 'r-')
-    #     ax.set_title('PyQt Matplotlib Example')
-    #     self.draw()
+
 
     def candleStickPlot(self, dfs1, MAs):
         df_candleStickPlot = dfs1[['Date', 'Open', 'Day_High', 'Day_Low', 'Close', 'Num_Deals']]
