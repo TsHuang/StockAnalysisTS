@@ -88,7 +88,7 @@ def getDataByStockIdx(stockIdx, MAs, days=30):
 
 if __name__ == "__main__":
     MAs = [5, 10, 20]  # Moving average of 5, 10, 20 days
-    dfs1 = getDataByStockIdx(stockIdx=2454, MAs=MAs, days=60)
+    dfs1 = getDataByStockIdx(stockIdx=2330, MAs=MAs, days=60)
     candleStickPlot(dfs1=dfs1, MAs=MAs)
 
 

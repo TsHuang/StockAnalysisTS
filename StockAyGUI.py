@@ -10,7 +10,6 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QLineEdit, QVBoxLayout, QHBoxLayout, \
     QFormLayout, QProgressBar
 from PyQt5.QtCore import QThread, pyqtSignal
@@ -64,9 +63,7 @@ class App(QMainWindow):
         ##########################################
         # m = PlotCanvas(self, width=5, height=4)
 
-        self.candlitPlot = PlotCandlit(self, width=5, height=4)
-
-
+        self.candlitPlot = PlotCandlit(self, width=5, height=4, stockIdx=2454, days=60)
 
         self.line_hello = QLineEdit(self)
         self.line_hello.setText("2454")
@@ -78,9 +75,6 @@ class App(QMainWindow):
         # Layout of the interface
 
         ########################################
-        # self.h_layout = QVBoxLayout()
-        # self.h_layout.addWidget(self.line_hello)
-        # self.h_layout.addWidget(self.button_search)
 
         LeftView = QGridLayout()
         LeftView.setColumnStretch(0, 4)
@@ -107,35 +101,9 @@ class App(QMainWindow):
         pass
 
 
-# class PlotCanvas(FigureCanvas):
-#     def __init__(self, parent=None, width=5, height=4, dpi=100):
-#         fig = Figure(figsize=(width, height), dpi=dpi)
-#         self.axes = fig.add_subplot(111)
-#
-#         FigureCanvas.__init__(self, fig)
-#         self.setParent(parent)
-#
-#         FigureCanvas.setSizePolicy(self,
-#                                    QSizePolicy.Expanding,
-#                                    QSizePolicy.Expanding)
-#         FigureCanvas.updateGeometry(self)
-#         self.plot()
-#
-#     def plot(self):
-#         data = [random.random() for i in range(25)]
-#         ax = self.figure.add_subplot(211)
-#         ax.plot(data, 'r-')
-#         ax.set_title('PyQt Matplotlib Example')
-#         ax2 = self.figure.add_subplot(212)
-#         ax2.plot(data, 'r-')
-#         ax2.set_title('PyQt Matplotlib Example')
-#         self.draw()
-
-
 class PlotCandlit(FigureCanvas):
-    def __init__(self, parent=None, width=7, height=6, dpi=100):
+    def __init__(self, parent=None, width=7, height=6, dpi=100, stockIdx=2454, days=60):
         fig = Figure(figsize=(width, height), dpi=dpi)
-
 
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)
@@ -143,23 +111,18 @@ class PlotCandlit(FigureCanvas):
         FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
 
-
         self.canvas = FigureCanvas(fig)
 
-        #fig = plt.figure(figsize=(10, 60), facecolor='green', edgecolor='red')
+        # fig = plt.figure(figsize=(10, 60), facecolor='green', edgecolor='red')
 
         MAs = [5, 10, 20]  # Moving average of 5, 10, 20 days
-        dfs1 = self.getDataByStockIdx(stockIdx=2454, MAs=MAs, days=60)
-        self.candleStickPlot(dfs1=dfs1, MAs=MAs)
+        dfs1 = self.getDataByStockIdx(stockIdx=stockIdx, MAs=MAs, days=days)
+        self.candleStickPlot(dfs1=dfs1, MAs=MAs, stockIdx=stockIdx)
 
-
-
-    def candleStickPlot(self, dfs1, MAs):
+    def candleStickPlot(self, dfs1, MAs, stockIdx):
         df_candleStickPlot = dfs1[['Date', 'Open', 'Day_High', 'Day_Low', 'Close', 'Num_Deals']]
         df_candleStickPlot['Date'] = df_candleStickPlot['Date'].apply(mdates.date2num)
 
-        # f1 = plt.subplot2grid((6, 4), (0, 0), rowspan=5, colspan=4, axisbg='#07000d')
-        # f1 = self.figure.subplot2grid((6, 4), (0, 0), rowspan=5, colspan=4, axisbg='#07000d')
         f1 = self.figure.add_subplot(211, axisbg='black')
         # plot candlestick
         candlestick_ohlc(f1, df_candleStickPlot.values, width=.6, colorup='#ff1717', colordown='#53c156')
@@ -170,13 +133,10 @@ class PlotCandlit(FigureCanvas):
             ma_key = 'MA' + str(MA_value)
             f1.plot(dfs1['Date'], dfs1[ma_key])  # plot MA
 
-        f1.set_title('2454')
+        f1.set_title(str(stockIdx))
         f1.axes.get_xaxis().set_visible(False)
         f1.set_ylabel('Price')
 
-        # plot volumn
-        # f2 = plt.subplot2grid((6, 4), (5, 0), rowspan=6, colspan=4, axisbg='#07000d')
-        # f2 = self.figure.subplot2grid((6, 4), (5, 0), rowspan=6, colspan=4, axisbg='#07000d')
 
         f2 = self.figure.add_subplot(212, axisbg='black')
         f2.bar(dfs1['Date'], dfs1['Num_Deals'])
@@ -185,13 +145,10 @@ class PlotCandlit(FigureCanvas):
         # plt.xticks(rotation=45)
         f2.axes.xaxis.set_visible(True)
         for tick in f2.axes.get_xticklabels():
-            print(tick)
+            # print(tick)
             tick.set_rotation(45)
 
-
         self.draw()
-
-
 
     def getDataByStockIdx(self, stockIdx, MAs, days=30):
         keys = ['Date', 'Days_Trade', 'Turnover_Value', 'Open', 'Day_High', 'Day_Low', 'Close', 'Price_Dif',
@@ -204,6 +161,7 @@ class PlotCandlit(FigureCanvas):
         MA_max = max(MAs)
 
         df = df.tail(int(days) + int(MA_max) - 1)
+        print(df)
 
         # preprocessing
         for idx in range(len(df)):
@@ -244,6 +202,7 @@ class TutorialThread(QThread):
         for index in range(1, 101):
             self.update.emit(index)
             time.sleep(0.5)
+
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -296,7 +255,6 @@ class MainWindow(QWidget):
 
 
 if __name__ == "__main__":
-
     app = QApplication(sys.argv)
 
     # MainWindow = MainWindow()

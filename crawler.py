@@ -339,6 +339,10 @@ def financial_statement(year, season, type='綜合損益彙總表'):
 
 if __name__ == "__main__":
     main()
+
+    # crawler = Crawler()
+    # crawler.post_process()
+
     # crawler = Crawler()
     # first_day = datetime(2018, 5, 11)
     # crawler.get_data((first_day.year, first_day.month, first_day.day))
