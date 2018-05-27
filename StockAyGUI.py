@@ -6,6 +6,11 @@ import matplotlib.dates as mdates
 from mpl_finance import candlestick_ohlc
 import datetime
 
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+
+
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QLineEdit, QVBoxLayout, QHBoxLayout, \
     QFormLayout, QProgressBar
 from PyQt5.QtCore import QThread, pyqtSignal
@@ -16,6 +21,8 @@ from PyQt5.QtGui import QIcon
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
+
+from functools import partial
 
 import random
 
@@ -34,30 +41,70 @@ class App(QMainWindow):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
-        # m = PlotCanvas(self, width=5, height=4)
-        self.candlelit = PlotCandlit(self, width=5, height=4)
+        top_widget = QWidget()
+        grid_layout = QGridLayout()
 
-        # m.move(0, 0)
+        ##########################################
+
+        # menu
+
+        ##########################################
+
+        self.menu_bar = QMenuBar()
+        self.file_menu = self.menu_bar.addMenu("File")
+        self.open_file_action = self.file_menu.addAction("Open File")
+        self.open_file_action.triggered.connect(partial(self._open_file_action, None))
+
+        self.setMenuBar(self.menu_bar)
+
+        ##########################################
+
+        # components
+
+        ##########################################
+        # m = PlotCanvas(self, width=5, height=4)
+
+        self.candlitPlot = PlotCandlit(self, width=5, height=4)
+
+
 
         self.line_hello = QLineEdit(self)
         self.line_hello.setText("2454")
         self.button_search = QPushButton('Search', self)
         self.button_search.setToolTip('Search and show the candlelit plot')
-        # self.button_search.move(500, 0)
 
-        form_layout = QFormLayout()
-        form_layout.addRow(self.button_search, self.line_hello)
-        # form_layout.addRow(self.line_hello)
-        form_layout.addRow(self.candlelit)
+        ########################################
 
-        h_layout = QVBoxLayout()
-        h_layout.addLayout(form_layout)
+        # Layout of the interface
 
-        self.setLayout(h_layout)
+        ########################################
+        # self.h_layout = QVBoxLayout()
+        # self.h_layout.addWidget(self.line_hello)
+        # self.h_layout.addWidget(self.button_search)
 
-        # button.resize(140, 100)
+        LeftView = QGridLayout()
+        LeftView.setColumnStretch(0, 4)
+        LeftView.setColumnStretch(1, 4)
+        LeftView.addWidget(self.line_hello, 0, 0, 1, 3)
+        LeftView.addWidget(self.button_search, 0, 2, 1, 1)
+        LeftView.addWidget(QLabel("1"), 1, 0, 1, 4)
+
+        RightView = QGridLayout()
+        RightView.addWidget(self.candlitPlot)
+
+        grid_layout.setColumnStretch(1, 4)
+        grid_layout.setColumnStretch(2, 4)
+
+        grid_layout.addLayout(LeftView, 0, 0, 1, 1)
+        grid_layout.addLayout(RightView, 0, 1, 1, 3)
+
+        top_widget.setLayout(grid_layout)
+        self.setCentralWidget(top_widget)
 
         self.show()
+
+    def _open_file_action(self, file_path=None):
+        pass
 
 
 # class PlotCanvas(FigureCanvas):
@@ -88,8 +135,6 @@ class App(QMainWindow):
 class PlotCandlit(FigureCanvas):
     def __init__(self, parent=None, width=7, height=6, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = fig.add_subplot(111)
-        # self.axes2 = fig.add_subplot(212)
 
 
         FigureCanvas.__init__(self, fig)
@@ -113,9 +158,9 @@ class PlotCandlit(FigureCanvas):
         df_candleStickPlot = dfs1[['Date', 'Open', 'Day_High', 'Day_Low', 'Close', 'Num_Deals']]
         df_candleStickPlot['Date'] = df_candleStickPlot['Date'].apply(mdates.date2num)
 
-        # self.f1 = plt.subplot2grid((6, 4), (0, 0), rowspan=5, colspan=4, axisbg='#07000d')
-        # f1 = self.axes.subplot2grid((6, 4), (0, 0), rowspan=5, colspan=4, axisbg='#07000d')
-        f1 = self.figure.add_subplot(211)
+        # f1 = plt.subplot2grid((6, 4), (0, 0), rowspan=5, colspan=4, axisbg='#07000d')
+        # f1 = self.figure.subplot2grid((6, 4), (0, 0), rowspan=5, colspan=4, axisbg='#07000d')
+        f1 = self.figure.add_subplot(211, axisbg='black')
         # plot candlestick
         candlestick_ohlc(f1, df_candleStickPlot.values, width=.6, colorup='#ff1717', colordown='#53c156')
         # ohlc = [] # should be something like [(1, 2, 3, 4, 5), (1, 2, 3, 4, 5), (1, 2, 3, 4, 5)] where 1, 2, 3, 4 refer to the date, open, high, low, close, volumn
@@ -130,15 +175,23 @@ class PlotCandlit(FigureCanvas):
         f1.set_ylabel('Price')
 
         # plot volumn
-        # self.f2 = plt.subplot2grid((6, 4), (5, 0), rowspan=6, colspan=4, axisbg='#07000d')
-        f2 = self.figure.add_subplot(212)
+        # f2 = plt.subplot2grid((6, 4), (5, 0), rowspan=6, colspan=4, axisbg='#07000d')
+        # f2 = self.figure.subplot2grid((6, 4), (5, 0), rowspan=6, colspan=4, axisbg='#07000d')
+
+        f2 = self.figure.add_subplot(212, axisbg='black')
         f2.bar(dfs1['Date'], dfs1['Num_Deals'])
         f2.set_ylabel('Volume')
 
-        plt.xticks(rotation=45)
+        # plt.xticks(rotation=45)
+        f2.axes.xaxis.set_visible(True)
+        for tick in f2.axes.get_xticklabels():
+            print(tick)
+            tick.set_rotation(45)
+
 
         self.draw()
-        # self.show()
+
+
 
     def getDataByStockIdx(self, stockIdx, MAs, days=30):
         keys = ['Date', 'Days_Trade', 'Turnover_Value', 'Open', 'Day_High', 'Day_Low', 'Close', 'Price_Dif',
